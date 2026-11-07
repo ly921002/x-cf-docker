@@ -77,6 +77,8 @@ XHTTP_PATH_BASE="${XHTTP_PATH_BASE:-/api/v1}"
 XHTTP_PATH_LEN="${XHTTP_PATH_LEN:-8}"
 XHTTP_MODE="${XHTTP_MODE:-auto}"
 XHTTP_PADDING="${XHTTP_PADDING:-}"
+# 信任的前端请求头（CDN 回源时用；Cloudflare 默认 CF-Connecting-IP）
+TRUSTED_XFF_HEADER="${TRUSTED_XFF_HEADER:-CF-Connecting-IP}"
 FLOW="${FLOW:-}"
 XRAY_ENCRYPTION_GROUP="${XRAY_ENCRYPTION_GROUP:-pq}"
 VLESS_NAME="${VLESS_NAME:-}"
@@ -331,6 +333,13 @@ build_config() {
           \"xPaddingBytes\": \"$(json_escape "$XHTTP_PADDING")\""
   fi
 
+  # 若设置了可信前端头，则在 inbounds 的 sockopt 中声明，避免刷屏告警并正确还原客户端 IP
+  SOCKOPT_LINE=""
+  if [ -n "$TRUSTED_XFF_HEADER" ]; then
+    SOCKOPT_LINE=",
+        \"sockopt\": { \"trustedXForwardedFor\": [ \"$(json_escape "$TRUSTED_XFF_HEADER")\" ] }"
+  fi
+
   # flow 相关片段：为空时完全不出现在配置与链接里
   if [ -n "$FLOW" ]; then
     FLOW_FIELD=", \"flow\": \"$(json_escape "$FLOW")\""
@@ -377,7 +386,7 @@ build_config() {
           "host": "$(json_escape "$XHTTP_HOST")",
           "path": "$(json_escape "$XHTTP_PATH")",
           "mode": "${XHTTP_MODE}"${PAD_LINE}
-        }
+        }${SOCKOPT_LINE}
       }
     }
   ],
@@ -438,7 +447,7 @@ EOF
           "host": "$(json_escape "$XHTTP_HOST")",
           "path": "$(json_escape "$XHTTP_PATH")",
           "mode": "${XHTTP_MODE}"${PAD_LINE}
-        }
+        }${SOCKOPT_LINE}
       }
     }
   ],

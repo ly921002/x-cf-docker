@@ -76,6 +76,7 @@ docker run -d \
 | `KEY_FILE` | `/cert/key.key` | 私钥路径 |
 | `CFIP` | 空 | 客户端连接的优选 IP（留空用 DOMAIN） |
 | `CFPORT` | `443` | 客户端连接的 CF 端口 |
+| `TRUSTED_XFF_HEADER` | `CF-Connecting-IP` | 信任的前端 IP 头；留空则关闭。用于 CDN 回源还原真实客户端 IP |
 
 ### 通用
 

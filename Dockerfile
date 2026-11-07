@@ -31,6 +31,7 @@ ENV MODE=reality \
     FLOW= \
     XRAY_ENCRYPTION_GROUP=pq \
     XHTTP_PADDING=100-1000 \
+    TRUSTED_XFF_HEADER=CF-Connecting-IP \
     TZ=Asia/Shanghai
 
 # 凭据与二进制缓存目录（挂载后重建容器不会失效、不会重复下载）
