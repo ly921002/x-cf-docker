@@ -15,6 +15,7 @@ services:
       XHTTP_PATH_BASE: /api/v1
       XHTTP_PATH_LEN: "8"
       XHTTP_MODE: auto
+      FLOW: "xtls-rprx-vision"   # 留空则不启用；开了必须和客户端一致
       XHTTP_PADDING: "100-1000"
       XRAY_ENCRYPTION_GROUP: pq  # pq | x25519
       TZ: Asia/Shanghai

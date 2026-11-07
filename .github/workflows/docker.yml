@@ -95,6 +95,7 @@ jobs:
             -e SNI=www.apple.com \
             -e SERVER_IP=127.0.0.1 \
             -e XRAY_PORT=8443 \
+            -e FLOW=xtls-rprx-vision \
             -e DRY_RUN=true \
             -v "$PWD/testdata:/data" \
             x-cf:test
@@ -104,6 +105,8 @@ jobs:
           test -f testdata/config.json || { echo "config.json 未生成"; exit 1; }
           grep -q '"security": "reality"' testdata/config.json || { echo "reality 配置缺失"; exit 1; }
           grep -q '"host": "www.apple.com"' testdata/config.json || { echo "host 白名单缺失"; exit 1; }
+          grep -q '"flow": "xtls-rprx-vision"' testdata/config.json || { echo "flow 未写入"; exit 1; }
+          grep -q 'flow=xtls-rprx-vision' testdata/node.txt || { echo "链接缺少 flow 参数"; exit 1; }
           test -f testdata/node.txt || { echo "node.txt 未生成"; exit 1; }
           echo "冒烟测试通过"
           cat testdata/node.txt

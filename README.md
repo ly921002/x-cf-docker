@@ -86,6 +86,7 @@ docker run -d \
 | `XHTTP_PATH_BASE` | `/api/v1` | 路径前缀 |
 | `XHTTP_PATH_LEN` | `8` | 随机段长度，`0` 表示只用 BASE |
 | `XHTTP_MODE` | `auto` | `auto` / `packet-up` / `stream-up` / `stream-one` |
+| `FLOW` | 空（不启用） | `xtls-rprx-vision` 或留空。**必须与客户端一致**，否则连不上 |
 | `XHTTP_PADDING` | `100-1000` | 填充范围，留空关闭 |
 | `XRAY_ENCRYPTION_GROUP` | `pq` | `pq`（ML-KEM，链接约 1800 字符）或 `x25519`（链接约 200 字符） |
 | `VLESS_NAME` | 按模式 | 链接备注名 |

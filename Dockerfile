@@ -28,6 +28,7 @@ ENV MODE=reality \
     XHTTP_PATH_BASE=/api/v1 \
     XHTTP_PATH_LEN=8 \
     XHTTP_MODE=auto \
+    FLOW= \
     XRAY_ENCRYPTION_GROUP=pq \
     XHTTP_PADDING=100-1000 \
     TZ=Asia/Shanghai

@@ -29,6 +29,7 @@
 #    XHTTP_PATH_BASE       路径前缀（默认 /api/v1）
 #    XHTTP_PATH_LEN        随机路径长度（默认 8，0 表示只用 BASE）
 #    XHTTP_MODE            auto | packet-up | stream-up | stream-one
+#    FLOW                  xtls-rprx-vision 或留空（默认空，不启用）
 #    XHTTP_PADDING         填充范围如 100-1000（留空关闭）
 #    XRAY_ENCRYPTION_GROUP pq | x25519
 #    VLESS_NAME            链接备注名
@@ -76,9 +77,17 @@ XHTTP_PATH_BASE="${XHTTP_PATH_BASE:-/api/v1}"
 XHTTP_PATH_LEN="${XHTTP_PATH_LEN:-8}"
 XHTTP_MODE="${XHTTP_MODE:-auto}"
 XHTTP_PADDING="${XHTTP_PADDING:-}"
+FLOW="${FLOW:-}"
 XRAY_ENCRYPTION_GROUP="${XRAY_ENCRYPTION_GROUP:-pq}"
 VLESS_NAME="${VLESS_NAME:-}"
 DRY_RUN="${DRY_RUN:-false}"
+
+# flow 只有 xtls-rprx-vision 一个合法值；非法值会让 xray 拒绝启动
+case "$FLOW" in
+  ""|none) FLOW="" ;;
+  xtls-rprx-vision) ;;
+  *) die "FLOW 只能是 xtls-rprx-vision 或留空（none），当前: $FLOW" ;;
+esac
 
 mkdir -p "$WORKDIR"
 cd "$WORKDIR"
@@ -322,6 +331,15 @@ build_config() {
           \"xPaddingBytes\": \"$(json_escape "$XHTTP_PADDING")\""
   fi
 
+  # flow 相关片段：为空时完全不出现在配置与链接里
+  if [ -n "$FLOW" ]; then
+    FLOW_FIELD=", \"flow\": \"$(json_escape "$FLOW")\""
+    FLOW_PARAM="&flow=${FLOW}"
+  else
+    FLOW_FIELD=""
+    FLOW_PARAM=""
+  fi
+
   if [ "$MODE" = "reality" ]; then
     [ -n "$SNI" ] || die "reality 模式需要 SNI（伪装域名）"
     [ "$XRAY_PORT" = "443" ] || warn "Reality 监听在 $XRAY_PORT（非 443）更容易被识别"
@@ -341,7 +359,7 @@ build_config() {
       "port": ${XRAY_PORT},
       "protocol": "vless",
       "settings": {
-        "clients": [ { "id": "${UUID}" } ],
+        "clients": [ { "id": "${UUID}"${FLOW_FIELD} } ],
         "decryption": "$(json_escape "$DEKEY")"
       },
       "streamSettings": {
@@ -373,7 +391,7 @@ EOF
     CONNECT_HOST="$SERVER_IP"
     CONNECT_PORT="$XRAY_PORT"
     VLESS_NAME="${VLESS_NAME:-VLESS-XHTTP-REALITY}"
-    VLESS_LINK="vless://${UUID}@${CONNECT_HOST}:${CONNECT_PORT}?encryption=${ENKEY}&security=reality&pbk=${PUBLIC_KEY}&sid=${SHORT_ID}&sni=$(uri_escape "$SNI")&fp=chrome&type=xhttp&mode=${XHTTP_MODE}&path=$XHTTP_PATH&host=$(uri_escape "$XHTTP_HOST")#${VLESS_NAME}"
+    VLESS_LINK="vless://${UUID}@${CONNECT_HOST}:${CONNECT_PORT}?encryption=${ENKEY}&security=reality&pbk=${PUBLIC_KEY}&sid=${SHORT_ID}&sni=$(uri_escape "$SNI")&fp=chrome&type=xhttp&mode=${XHTTP_MODE}${FLOW_PARAM}&path=$XHTTP_PATH&host=$(uri_escape "$XHTTP_HOST")#${VLESS_NAME}"
 
   else
     [ -n "$DOMAIN" ] || die "cdn 模式需要 DOMAIN"
@@ -402,7 +420,7 @@ EOF
       "port": ${XRAY_PORT},
       "protocol": "vless",
       "settings": {
-        "clients": [ { "id": "${UUID}" } ],
+        "clients": [ { "id": "${UUID}"${FLOW_FIELD} } ],
         "decryption": "$(json_escape "$DEKEY")"
       },
       "streamSettings": {
@@ -432,7 +450,7 @@ EOF
 EOF
 
     VLESS_NAME="${VLESS_NAME:-VLESS-XHTTP-CDN}"
-    VLESS_LINK="vless://${UUID}@${CONNECT_HOST}:${CONNECT_PORT}?encryption=${ENKEY}&security=tls&type=xhttp&mode=${XHTTP_MODE}&path=$XHTTP_PATH&host=$(uri_escape "$DOMAIN")&sni=$(uri_escape "$DOMAIN")#${VLESS_NAME}"
+    VLESS_LINK="vless://${UUID}@${CONNECT_HOST}:${CONNECT_PORT}?encryption=${ENKEY}&security=tls&type=xhttp&mode=${XHTTP_MODE}${FLOW_PARAM}&path=$XHTTP_PATH&host=$(uri_escape "$DOMAIN")&sni=$(uri_escape "$DOMAIN")#${VLESS_NAME}"
   fi
 }
 
@@ -466,6 +484,7 @@ print_info() {
   echo "UUID      : $UUID"
   echo "Path      : $XHTTP_PATH"
   echo "加密组    : $XRAY_ENCRYPTION_GROUP"
+  echo "Flow      : ${FLOW:-（未启用）}"
   echo ""
   echo "链接:"
   echo "$VLESS_LINK"
