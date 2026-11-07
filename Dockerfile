@@ -1,4 +1,4 @@
- syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
 # ---------------------------------------------------------------------------
 # 运行时镜像：不预置 Xray，由 entrypoint 在容器启动时下载 + 校验
