@@ -2,7 +2,7 @@
 
 VLESS + XHTTP 节点镜像（REALITY / TLS-CDN 双模式），**完全由环境变量控制**，GitHub Actions 自动构建公开镜像。
 
-- 镜像地址：`ghcr.io/<ly921002>/x-cf:latest`
+- 镜像地址：`ghcr.io/ly921002/x-cf-docker:latest`
 - 架构：`linux/amd64` + `linux/arm64`
 - Xray 在**容器启动时**下载并校验（不预置在镜像里，镜像约 20 MB，每次启动都能拿到最新版）
 
@@ -21,7 +21,7 @@ docker run -d \
   -e SNI=www.apple.com \
   -e XRAY_PORT=443 \
   -v "$PWD/xcf-data:/data" \
-  ghcr.io/ly921002/x-cf:latest
+  ghcr.io/ly921002/x-cf-docker:latest
 
 docker logs x-cf | grep -A2 '链接'
 ```
@@ -39,7 +39,7 @@ docker run -d \
   -e CFPORT=443 \
   -v "$PWD/cert:/cert:ro" \
   -v "$PWD/xcf-data:/data" \
-  ghcr.io/ly921002/x-cf:latest
+  ghcr.io/ly921002/x-cf-docker:latest
 ```
 
 ---

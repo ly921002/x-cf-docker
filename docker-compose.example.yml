@@ -1,6 +1,6 @@
-ervices:
+services:
   x-cf:
-    image: ghcr.io/ly921002/x-cf:latest
+    image: ghcr.io/ly921002/x-cf-docker:latest
     container_name: x-cf
     restart: unless-stopped
     # host 模式：Reality 需要真实来源 IP，且便于监听 443
@@ -25,7 +25,7 @@ ervices:
 
   # ---------------- cdn 模式示例（把上面那个 service 注释掉再用）----------------
   # x-cf-cdn:
-  #   image: ghcr.io/ly921002/x-cf:latest
+  #   image: ghcr.io/ly921002/x-cf-docker:latest
   #   container_name: x-cf-cdn
   #   restart: unless-stopped
   #   network_mode: host
