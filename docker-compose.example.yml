@@ -1,0 +1,41 @@
+ervices:
+  x-cf:
+    image: ghcr.io/ly921002/x-cf:latest
+    container_name: x-cf
+    restart: unless-stopped
+    # host 模式：Reality 需要真实来源 IP，且便于监听 443
+    network_mode: host
+    environment:
+      MODE: reality              # reality | cdn
+      XRAY_PORT: "443"
+      SNI: www.apple.com         # 伪装域名，需支持 TLS1.3 + h2
+      # SERVER_IP: 1.2.3.4       # 留空则自动探测公网 IP
+      # XRAY_VERSION: v26.10.31  # 留空/ latest 表示总是最新
+      # XRAY_FORCE_UPDATE: "true"
+      XHTTP_PATH_BASE: /api/v1
+      XHTTP_PATH_LEN: "8"
+      XHTTP_MODE: auto
+      XHTTP_PADDING: "100-1000"
+      XRAY_ENCRYPTION_GROUP: pq  # pq | x25519
+      TZ: Asia/Shanghai
+    volumes:
+      - ./xcf-data:/data
+      # cdn 模式取消下面这行注释
+      # - ./cert:/cert:ro
+
+  # ---------------- cdn 模式示例（把上面那个 service 注释掉再用）----------------
+  # x-cf-cdn:
+  #   image: ghcr.io/ly921002/x-cf:latest
+  #   container_name: x-cf-cdn
+  #   restart: unless-stopped
+  #   network_mode: host
+  #   environment:
+  #     MODE: cdn
+  #     DOMAIN: example.com
+  #     XRAY_PORT: "8443"
+  #     CFPORT: "443"
+  #     # CFIP: 104.16.1.1
+  #     XRAY_ENCRYPTION_GROUP: pq
+  #   volumes:
+  #     - ./xcf-data-cdn:/data
+  #     - ./cert:/cert:ro
